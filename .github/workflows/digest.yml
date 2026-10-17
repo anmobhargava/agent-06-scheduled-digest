@@ -1,0 +1,47 @@
+# The schedule. Every Monday morning (US Eastern) this runs the crew once and commits the result.
+# You can also start it by hand from the Actions tab. Tick "demo" to try it without a key.
+#
+# Secrets (Settings > Secrets and variables > Actions):   ANTHROPIC_API_KEY
+# Optional variables:                                     MAX_RUN_USD (default 0.50), MONTHLY_CAP_USD (default 5)
+name: weekly digest
+
+on:
+  schedule:
+    - cron: "0 12 * * 1"          # 12:00 UTC on Mondays, which is 7 or 8 in the morning in New York
+  workflow_dispatch:
+    inputs:
+      demo:
+        description: "Run the offline demo on sample articles (no key, nothing published)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write                 # needed to commit the digest back to the repo
+
+concurrency:
+  group: weekly-digest            # never two runs at once, so the cost caps cannot be raced
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15           # one more cap: a hung run is killed
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install -r requirements.txt
+      - name: Run the crew
+        env:
+          PYTHONPATH: src
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          MAX_RUN_USD: ${{ vars.MAX_RUN_USD || '0.50' }}
+          MONTHLY_CAP_USD: ${{ vars.MONTHLY_CAP_USD || '5' }}
+        run: python -m digest.main ${{ inputs.demo && '--demo' || '' }}
+      - name: Commit the digest and the run record
+        if: always()              # keep the record even when the run stopped, because the record says why
+        run: |
+          git config user.name "digest-bot"
+          git config user.email "digest-bot@users.noreply.github.com"
+          git add digests runs drafts 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "digest: $(date -u +%F)" && git push)

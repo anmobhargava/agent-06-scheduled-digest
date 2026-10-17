@@ -1,0 +1,8 @@
+# Feeds the digest reads. Add or remove freely. One that is down or has changed its address is skipped and listed in the run record.
+# I have not been able to check these addresses from where I built this, so confirm each one loads before you rely on the digest.
+feeds:
+  - {name: Marketing Dive, url: "https://www.marketingdive.com/feeds/news/"}
+  - {name: Search Engine Land, url: "https://searchengineland.com/feed"}
+  - {name: MarTech, url: "https://martech.org/feed/"}
+  - {name: Adweek, url: "https://www.adweek.com/feed/"}
+  - {name: Think with Google, url: "https://www.thinkwithgoogle.com/feed/"}

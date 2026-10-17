@@ -1,0 +1,36 @@
+research_task:
+  description: >
+    Topic: {topic}. Week of {week_of}.
+    Call list_items to see this week's articles. Read the ones that look most useful with read_item, then choose at most
+    {max_picks}. Skip sponsored items, duplicates of a story you already picked, and pieces with no concrete finding.
+  expected_output: >
+    The picks, most important first, each with its article id and one sentence on why it matters, plus the ids you skipped.
+
+write_task:
+  description: >
+    Write the digest for the week of {week_of} from the research notes only.
+    Format: a title line starting with '# ', one short intro sentence, then between 3 and {max_picks} bullets starting
+    with '- '. Each bullet is one or two sentences and ends with the article id in square brackets, like [i3].
+    Do not write web addresses. Stay under {max_words} words.
+  expected_output: >
+    The digest in markdown, and nothing else.
+
+review_task:
+  description: >
+    Check the draft digest against the research notes. Call check_draft with the full draft. Then compare each bullet with
+    the notes: flag any number or claim the notes do not support. Approve only if check_draft returned PASS and every
+    bullet is supported.
+  expected_output: >
+    A verdict: approved or not, and a list of specific issues (empty if approved).
+
+revise_task:
+  description: >
+    Rewrite the draft to fix the reviewer's issues, using only the research notes.
+    Previous draft:
+    {draft}
+    Issues to fix:
+    {issues}
+    Keep the same format: a title line starting with '# ', one intro sentence, 3 to {max_picks} bullets each ending
+    with an article id like [i3], no web addresses, under {max_words} words.
+  expected_output: >
+    The corrected digest in markdown, and nothing else.
